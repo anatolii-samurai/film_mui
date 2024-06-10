@@ -159,8 +159,8 @@ padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  pointer-events: none;
+  /* opacity: 0;
+  pointer-events: none; */
   transition: 0.5s;
 }
 .modal__content{
@@ -170,8 +170,8 @@ padding: 0px;
   background-color: white;
   width: 60vh;
   height: 100px;
-  transform: scale(0.5);
-  transition: 0.4s all;
+  /* transform: scale(0.5);
+  transition: 0.4s all; */
 }
 .modal.active{
   opacity: 1;

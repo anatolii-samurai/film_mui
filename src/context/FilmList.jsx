@@ -3,12 +3,17 @@ import { MoviesProvider } from '../context/movies-context';
 import {FilmCard} from '../pages/Card';
 
 
-export default function FilmList(){
 
+export default function FilmList(){
     return(
-        <MoviesProvider>
+        <>
+         <MoviesProvider>
             <FilmCard/>
         </MoviesProvider>
+        </>
+       
+ 
     )
+            
     
 }

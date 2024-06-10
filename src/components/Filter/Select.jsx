@@ -18,6 +18,10 @@ const sortBy = [
     name: 'Рейтингу',
     value: SORT_OPINIONS.RATING
   },
+  {
+    name: 'Избранное',
+    value: SORT_OPINIONS.FAVOURITE
+  }
 ]
 
 export const SelectCategory = () =>{

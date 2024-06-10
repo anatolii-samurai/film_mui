@@ -1,21 +1,26 @@
 import { useCallback, useState } from 'react';
 import { InputLabel,Input,IconButton,InputAdornment,Button } from '@mui/material';
 import Modal from './Modal';
-
+import Cookies from 'js-cookie';
+import { COOKIE_KEYS } from '../api/api';
 import { Visibility,VisibilityOff } from '@mui/icons-material';
-
-
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Form } from 'react-router-dom';
 import { useAuth } from '../../context/Auth';
-import { token } from '../api/api';
+import { token as userToken } from '../api/api';
+import { getUserId } from '../api/api';
 
 
+ async function action(){
+        const user = await getUserId();
+        console.log(user.id);
+         Cookies.set(COOKIE_KEYS.ACCOUNT_ID,user.id);   
+}
 
-export default function Token(){
-    // const [user, setUserToken] = useState("");
+export  function Token(){
     const [values, setValues] = useState({
       password: "",
       showPassword: false,
+      id:"user_id"
   });
     const [modalActive,setModalActive] = useState(true)
     const { setUser } = useAuth();
@@ -23,10 +28,25 @@ export default function Token(){
     const login = useCallback(
       (e) => {
         e.preventDefault();
-        
-          setUser ({ values });
-          navigate("/");
-        
+        // eslint-disable-next-line no-debugger
+        if (values.password === userToken ) {
+            setUser ({ values });
+            action()
+            // eslint-disable-next-line no-debugger
+            navigate("/");
+        // eslint-disable-next-line no-debugger
+        } 
+        // eslint-disable-next-line no-debugger
+        else if(Cookies.get("user_id")){
+            setUser ({ values });
+            action()
+            // eslint-disable-next-line no-debugger
+            navigate("/");
+        }else{
+            // eslint-disable-next-line no-debugger
+            navigate("/login");
+        }
+            
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [setUser, values]
@@ -49,12 +69,13 @@ export default function Token(){
           [prop]: event.target.value,
       });
   };
-   
+    
     return(
         <>
         
         <Modal active ={modalActive} setModalActive={setModalActive}   >
-          <form onSubmit={login}>
+            <Form method='post' onSubmit={login} >
+           
           <InputLabel sx={{paddingBottom:'20px'}} htmlFor="standard-adornment-password">
             Введите ключ!
           </InputLabel>
@@ -65,7 +86,9 @@ export default function Token(){
                         : "password"
                 }
                 onChange={handlePasswordChange("password")}
-                defaultValue={token}
+                // value={values.password}
+                name='token'
+                defaultValue={values.password=userToken}
                 endAdornment={
                     <InputAdornment position="end">
                         <IconButton
@@ -86,10 +109,12 @@ export default function Token(){
                 }
             />
        
-       <Button variant="outlined" type='submit' sx={{marginLeft:'20px'}}  onClick={()=>{setModalActive(false)}}>Отправить</Button>
+       <Button  variant="outlined" type='submit' sx={{marginLeft:'20px'}}  onClick={()=>{setModalActive(false)}}>Отправить</Button>
          
          
-          </form>
+          
+            </Form>
+          
           
        
         

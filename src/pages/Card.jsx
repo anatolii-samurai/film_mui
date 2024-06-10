@@ -3,35 +3,89 @@ import {Card,CardActions,CardContent,CardMedia,CardActionArea} from '@mui/materi
 import {Box, IconButton} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
-import { getMovies,getMoviePathUrl } from '../components/api/api';
+import { getMovies,getMoviePathUrl, COOKIE_KEYS, controlFavouriteMovies } from '../components/api/api';
 import { useContext,useState,useEffect } from 'react';
-import { SORT_OPINIONS, TasksContext } from '../context/Context';
+import { SORT_OPINIONS, TasksContext, TasksDispatchContext } from '../context/Context';
 import { MoviesPopularContext } from '../context/movies-context';
 import { movieImageUrl } from '../components/api/movie-image';
 import { Link, } from 'react-router-dom';
-
-
- 
+import Cookies from 'js-cookie';
+import { getUserId } from '../components/api/api';
+ import { Star } from '@mui/icons-material';
+import { getMoviesByName } from '../components/api/api';
 
 export function FilmCard() {
-
-  const tasks= useContext(TasksContext)
-
-  const [imagesUrl, setImagesUrl] = useState({})
-  const {moviesPopular, setMoviesPopular} = useContext(MoviesPopularContext)
   
+  const tasks = useContext(TasksContext);
+ 
+  const dispatch = useContext(TasksDispatchContext)
+  const [favouriteMovies, setFavouriteMovies] = useState(new Set());
+  const [imagesUrl, setImagesUrl] = useState({});
+  const {moviesPopular, setMoviesPopular} = useContext(MoviesPopularContext);
+  
+  
+  const accountId = Cookies.get(COOKIE_KEYS.ACCOUNT_ID);
+
+  useEffect(() => {
+    async function fetchUserAndFavorites() {
+      const user = await getUserId();
+      Cookies.set(COOKIE_KEYS.ACCOUNT_ID, user.id);
+
+      const accountId = user.id;
+      const favouritesUrl = `https://api.themoviedb.org/3/account/${accountId}/favorite/movies`;
+      const favouriteMoviesData = await getMovies(favouritesUrl);
+      if (favouriteMoviesData) {
+        const favouriteMovieIds = new Set(favouriteMoviesData.results.map(movie => movie.id));
+        setFavouriteMovies(favouriteMovieIds);
+      }
+    }
+    fetchUserAndFavorites();
+  }, []);
+
+  const handleFavouriteClick = async (movieId) => {
+    const isFavourite = favouriteMovies.has(movieId);
+    dispatch({type:'getFavouriteMovie',favouriteMovie:isFavourite})
+    await controlFavouriteMovies(movieId, !isFavourite, accountId);
+    setFavouriteMovies((prev) => {
+      const updated = new Set(prev);
+      if (isFavourite) {
+        updated.delete(movieId);
+      } else {
+        updated.add(movieId);
+      }
+      return updated;
+    });
+  };
+
+  async function searchMovieByName(){
+    const search = await getMoviesByName(tasks);debugger
+    setMoviesPopular(search.result);
+  } 
+  
+  
+
+
+
  useEffect(()=>{
+    async function action(){
+      const user = await getUserId();
+      Cookies.set(COOKIE_KEYS.ACCOUNT_ID,user.id);   
+    }
+    action();
     let movieListUrl
     const page = tasks.currentPage
     if(tasks.selectByCategory === SORT_OPINIONS.POPULARITY){
-      movieListUrl = `https://api.themoviedb.org/3/movie/popular?language=ru&page=${page}`
-    }else{
-      movieListUrl = `https://api.themoviedb.org/3/movie/top_rated?language=ru&page=${page}`
+      movieListUrl = `https://api.themoviedb.org/3/movie/popular?language=ru-RU&page=${page}`
+    }else if(tasks.selectByCategory === SORT_OPINIONS.RATING){
+      movieListUrl = `https://api.themoviedb.org/3/movie/top_rated?language=ru-RU&page=${page}`
+    }else {
+      movieListUrl = `https://api.themoviedb.org/3/account/${accountId}/favorite/movies`
     }
     async function fetchData() {
       try {
         const data = await getMovies(movieListUrl);
-        const details = await getMoviePathUrl() 
+        const details = await getMoviePathUrl();
+
         if (data) {
           setMoviesPopular(data.results)
         }
@@ -43,9 +97,9 @@ export function FilmCard() {
         console.error(e)
       }
     }
-
+    
     fetchData();
-  },[tasks.currentPage,tasks.selectByCategory]);
+  },[tasks.currentPage,tasks.selectByCategory,setMoviesPopular,accountId]);
 
 
 
@@ -64,7 +118,7 @@ export function FilmCard() {
     }}>
     
     {moviesPopular?.map((movie)=> {
-
+       const isFavourite = favouriteMovies.has(movie.id);
       return <Card sx={{ maxWidth: 300,height:540 }} className='card__film' key={movie.id}>
       <CardActionArea>
         <Link key={movie.id} to={`movie/${movie.id}`}>
@@ -82,7 +136,7 @@ export function FilmCard() {
         <CardActionArea sx={{ maxWidth: 250 }}>
         <Link key={movie.id} to={`movie/${movie.id}`}>
         <Typography gutterBottom variant="subtitle1" component="div" sx={{lineHeight:'20px'}}>
-        {movie.original_title}
+        {movie.title}
         </Typography>
         <Typography color="text.secondary" variant="subtitle2">
           Raiting: {Math.round(movie.vote_average)}
@@ -90,9 +144,11 @@ export function FilmCard() {
         </Link>
           </CardActionArea>
         <CardActions>
-        <IconButton>
-            <StarBorderIcon/>
-        </IconButton>
+
+         <IconButton onClick={()=>handleFavouriteClick(movie.id)}>
+         {isFavourite ? <Star/>:<StarBorderIcon/>}
+      </IconButton >
+        
         </CardActions>
         
 

@@ -5,8 +5,8 @@ import App from "../components/root";
 import Main from '../pages/main';
 import {CardDetail} from "../components/CardDetail/details-card";
 import { loader as movieLoader } from "../components/api/api";
-import Login from "../components/ModalPoppup/Login";
-import Token from "../components/ModalPoppup/Token";
+import Login,{action as getToken} from "../components/ModalPoppup/Login";
+import {Token,} from "../components/ModalPoppup/Token";
 
 import { RequireAuth } from "../context/Auth";
 import Header from "../header";
@@ -28,12 +28,17 @@ const router = createBrowserRouter([
           ,
           {
             path:'/login',
-            element:<Login/>
+            element:<Login/>,
+            action:getToken
           },
         {
           path:'/token',
-          element:<Token/>
+          element:<Token/>,
+          // action:postToken
         },
+        {
+          path:'/',
+          element:<Main/>},
         {
           element:<RequireAuth/>,
           children:[

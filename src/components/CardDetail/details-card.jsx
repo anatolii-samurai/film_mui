@@ -10,8 +10,7 @@ import MovieCardDetailsTable from "../MovieCardDetail/movie_card_details";
 
  export default function CardDetail(){
   const {movieDetails, movieCredits, moviePath} = useLoaderData()
-  console.log(movieDetails)
-  console.log(movieCredits)
+  
 
   const imgUrl = movieImageUrl(moviePath.images.base_url, moviePath.images.poster_sizes[4])
  
