@@ -8,7 +8,7 @@ export const TasksDispatchContext = createContext(null);
 export const SORT_OPINIONS = {
   POPULARITY: 'byPopularity',
   RATING: 'byRating',
-  FAVOURITE:'by favourite'
+  FAVOURITE:'by favourite',
 }
 // eslint-disable-next-line react/prop-types
 export function FilterProvider({children}){
@@ -20,7 +20,7 @@ export function FilterProvider({children}){
         currentPage:1,
         movieId:null,
         favouriteMovie:[],
-        searchMovies:[]
+        searchMovies:null
        }
     const[tasks,dispatch] = useReducer(checkReducer,initialState);
     
@@ -53,7 +53,7 @@ export function FilterProvider({children}){
         }
         case 'set_search_film':{
           return{
-            ...states,searchMovies: action.payload
+            ...states,searchMovies: action.searchMovies
           }
         }
         case 'set_sort_popularity':{
@@ -76,7 +76,8 @@ export function FilterProvider({children}){
           selectByCategory:SORT_OPINIONS.POPULARITY,
           selectByYear:[2002,2010],
           genres:[],
-          currentPage:1,}}
+          currentPage:1,
+          searchMovies:null}}
         case 'setMovieId' : {
           return{...states,
                 movieId:action.movieId

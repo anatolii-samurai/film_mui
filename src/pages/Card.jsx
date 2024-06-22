@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {Card,CardActions,CardContent,CardMedia,CardActionArea} from '@mui/material';
 import {Box, IconButton} from '@mui/material';
 import Typography from '@mui/material/Typography';
@@ -25,7 +24,7 @@ export function FilmCard() {
   
   
   const accountId = Cookies.get(COOKIE_KEYS.ACCOUNT_ID);
-
+ 
   useEffect(() => {
     async function fetchUserAndFavorites() {
       const user = await getUserId();
@@ -57,10 +56,7 @@ export function FilmCard() {
     });
   };
 
-  async function searchMovieByName(){
-    const search = await getMoviesByName(tasks);debugger
-    setMoviesPopular(search.result);
-  } 
+ 
   
   
 
@@ -72,24 +68,32 @@ export function FilmCard() {
       Cookies.set(COOKIE_KEYS.ACCOUNT_ID,user.id);   
     }
     action();
+    const searchName = tasks.searchMovies
+    async function searchMovieByName(){
+      const search = await getMoviesByName(searchName);debugger
+      setMoviesPopular(search.results);debugger
+    } 
+    searchMovieByName();debugger
     let movieListUrl
     const page = tasks.currentPage
-    if(tasks.selectByCategory === SORT_OPINIONS.POPULARITY){
+    if(tasks.selectByCategory === SORT_OPINIONS.POPULARITY && tasks.searchMovies === null){debugger
       movieListUrl = `https://api.themoviedb.org/3/movie/popular?language=ru-RU&page=${page}`
-    }else if(tasks.selectByCategory === SORT_OPINIONS.RATING){
+    }else if(tasks.selectByCategory === SORT_OPINIONS.RATING){debugger
       movieListUrl = `https://api.themoviedb.org/3/movie/top_rated?language=ru-RU&page=${page}`
-    }else {
+    }else if(tasks.selectByCategory === SORT_OPINIONS.FAVOURITE){debugger
       movieListUrl = `https://api.themoviedb.org/3/account/${accountId}/favorite/movies`
+    }else if(tasks.searchMovies === searchName) {debugger
+      movieListUrl = `https://api.themoviedb.org/3/search/movie?query=${searchName}&language=ru-RU`
     }
     async function fetchData() {
       try {
-        const data = await getMovies(movieListUrl);
+        const data = await getMovies(movieListUrl);debugger
         const details = await getMoviePathUrl();
 
         if (data) {
-          setMoviesPopular(data.results)
+          setMoviesPopular(data.results);debugger
         }
-        if (details){
+        if (details){debugger
           const url = movieImageUrl(details.images.base_url, details.images.poster_sizes[4])
           setImagesUrl(url)
         }
@@ -99,7 +103,7 @@ export function FilmCard() {
     }
     
     fetchData();
-  },[tasks.currentPage,tasks.selectByCategory,setMoviesPopular,accountId]);
+  },[tasks.currentPage,tasks.selectByCategory,setMoviesPopular,accountId,tasks.searchMovies]);
 
 
 

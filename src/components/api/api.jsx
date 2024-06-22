@@ -5,7 +5,8 @@ export const token = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmZmJlZDMzMGRmY2FkMmQ3Zjk4N
 
 export const COOKIE_KEYS = {
     EMAIL:'email',
-    ACCOUNT_ID:"user_id"
+    ACCOUNT_ID:"user_id",
+    SEARCH_FILM:"name_film"
 }
 
 
